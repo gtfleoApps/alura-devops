@@ -1,0 +1,181 @@
++ Rodando Docker no WSL 2 sem Docker Desktop:
+---------------------------------------------
+https://www.youtube.com/watch?v=wpdcGgRY5kk
+Git: https://github.com/codeedu/wsl2-docker-quickstart#docker-desktop-com-wsl2
+
+
++ Criando container com mysql:
+------------------------------
+Com o arquivo mysql+adminer.yml copiado e docker instalado:
+docker-compose -f mysql+adminer.yml up
+
+
+
++COMANDOS BASICOS:
+------------------
+
+Ativando/Desativando o Docker:
+> sudo service docker start
+> sudo service docker stopt
+
+Lista de Containers Ativos:
+> docker ps
+
+Lista de Todos os Containers:
+> docker ps -a
+
+Lista apenas os IDs dos Containers:
+> docker ps -q
+> docker ps -a -q
+
+Para o container executar algo:
+> docker run ubuntu echo "Ola Mundo"
+
+Fazer com que o terminal da máquina seja integrado ao terminal de dentro do container:
+> docker run -it ubuntu
+
+Executando novamente um container:
+> docker start 05025384675e (id vindo do docker ps -a)
+> docker stop 05025384675e
+
+Parando um container imediatamente:
+> docker stop -t 0 05025384675e
+
+Executando novamente um container e integrando ao terminal:
+> docker start -a -i 05025384675e
+
+Removendo um container:
+> docker rm c9f83bfb82a8
+
+Removendo todos os containers inativos:
+> docker container prune
+
+Listando imagens:
+> docker images
+
+Removendo imagens:
+> docker rmi nome-container
+
+Executando um container em background (sem travar o terminal) com detached:
+> docker run -d nome-container
+
+Como linkar uma porta do container a uma porta do computador:
+> docker run -d -P nome-container
+
+Para visualizar as portas que estão sendo utilizadas:
+> docker port container-id
+
+Nomeando um container:
+> docker run -d -P --name meu-site dockersamples/static-site
+
+Definindo uma porta especifica (-p porta-computador:porta-container):
+> docker run -d -p 12345:80 dockersamples/static-site
+
+Atribuindo uma variavel de ambiente:
+> docker run -d -P -e AUTHOR="Leonardo Guerra" dockersamples/static-site
+
+Parando todos os containers de uma só vez (passando como parametro os Ids dos containers ativos):
+> docker stop $(docker ps -q)
+> docker stop -t 0 $(docker ps -q)
+
++ USANDO VOLUMES:
+----------------
+Criando uma pasta no Docker Host (um volume "/var/www") para não perder os dados da camada de escritaao de um container removido:
+> docker run -v "/var/www" nome-da-imagem
+
+Descobrindo a pasta no docker host que o volume faz referência (Mount.Source):
+> docker inspect id-container
+
+Especificando o caminho do volume no docker host (diretorio-computador:diretorio-container):
+> entre na pasta pelo terminal > pwd > copie o resultado
+> docker run -v "resultado-pwd:/var/www" nome-da-imagem 
+
+
++ RODANDO CÓDIGO (node.js) EM UM CONTAINER:
+-------------------------------------------
+Criando container a partir de uma imagem oficial do node:
+> docker run node
+
+Criando um volume que faça referência à pasta do código:
+> docker run -v "/mnt/d/Developer/Cursos/Alura/02_DevOps/04-Docker/volume-exemplo:/var/www" node
+
+Iniciando o servidor, executando o comando npm start:
+> docker run -v "/mnt/d/Developer/Cursos/Alura/02_DevOps/04-Docker/volume-exemplo:/var/www" node npm start
+
+Linkando a porta 3000 do servidor no docker à porta do nosso computador, no caso a 8080:
+> docker run -p 8080:3000 -v "/mnt/d/Developer/Cursos/Alura/02_DevOps/04-Docker/volume-exemplo:/var/www" node npm start
+
+Em caso de erro, onde é ncessário informar onde rodar onde rodar o comando npm start (-w):
+> docker run -p 8080:3000 -v "/mnt/d/Developer/Cursos/Alura/02_DevOps/04-Docker/volume-exemplo:/var/www" -w "/var/www" node npm start
+
+Iniciar o servidor sem travar o terminal (Esse seria o comando final p/ geração do container com todas as configurações do exemplo!!!):
+> docker run -d -p 8080:3000 -v "/mnt/d/Developer/Cursos/Alura/02_DevOps/04-Docker/volume-exemplo:/var/www" -w "/var/www" node npm start
+
+Caso queira iniciar dentro do diretório onde está o projeto, o comando pode ficar assim (usando pwd):
+> docker run -d -p 8080:3000 -v "$(pwd):/var/www" -w "/var/www" node npm start
+
+
++ CONSTRUINDO IMAGENS:
+----------------------
+
+Comece criando um arquivo Dockerfile no seu projeto:
+> Dockerfile (quando só há um no projeto) ou nomeQualquer.dockerfile
+
+Exclua as dependências já estão instaladas no projeto (elas serão instaladas na montagem do container):
+> node_modules (remova essa pasta)
+
+- Dentro do dockerfile:
+Baseando de uma outra imagem:
+> FROM node:latest
+
+Responsável:
+> MAINTAINER Nome da Pessoa
+
+Setando variaveis de ambiente:
+> ENV NODE_ENV=production
+  ENV PORT=3000
+
+Movendo todo o código da aplicação para uma pasta específica do container:
+> COPY . /var/www
+
+Definindo a pasta de onde se deve executar os comandos do container carregado:
+> WORKDIR /var/www
+
+Instalando as dependências:
+> RUN npm install
+
+Comando executado assim que carregar o container:
+> ENTRYPOINT npm start (ou no formato json: ["npm", "start"])
+
+Definindo a porta (3000 por exemplo):
+> EXPOSE 3000
+
+O Dockerfile então ficou:
+FROM node:latest
+MAINTAINER Leonardo Guerra
+ENV NODE_ENV=production
+ENV PORT=3000
+COPY . /var/www
+WORKDIR /var/www
+RUN npm install
+ENTRYPOINT ["npm", "start"]
+EXPOSE $PORT
+
+Fazendo o build da imagem a partir do arquivo (-f), definindo usuario/nome da imagem (-t) e o contexto do arquivo (diretório, onde "." significa pasta atual do terminal):
+> docker build -f Dockerfile -t leoguerra/node .
+
+Verificando se a imagem existe:
+> docker images
+
+Teste criando um container a partir da imagem:
+> docker run -d -p 8080:3000 leoguerra/node-alura
+
+Disponibilize sua imagem no Docker Hub:
+Crie uma conta no docker hub, depois faça o login pelo terminal
+> docker login
+
+Faça um push da sua imagem:
+> docker push leoguerra/node-alura
+
+Faça um teste e recupere a imagem do docker hub:
+> docker pull leoguerra/node-alura

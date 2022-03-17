@@ -1,0 +1,162 @@
+*** Guilda Git *** 
+==================
+https://banco365.sharepoint.com.mcas.ms/sites/GuildasArq3.0/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2FGuildasArq3%2E0%2FShared%20Documents%2F%4021%2D08%2D18%20Git%20%2D%20Do%20commit%20ao%20merge%20request%2FRecordings%2F%5F72%20%2D%20Git%20%2D%20Do%20commit%20ao%20merge%20request%2D20210818%5F100708%2DGrava%C3%A7%C3%A3o%20de%20Reuni%C3%A3o%2Emp4&parent=%2Fsites%2FGuildasArq3%2E0%2FShared%20Documents%2F%4021%2D08%2D18%20Git%20%2D%20Do%20commit%20ao%20merge%20request%2FRecordings
+
+01-a) Criando repositorios p/ Arq3.0: 
+https://portal.nuvem.bb.com.br
+- Catalogo de Serviços > Desenvolvimento > Microsserviços Arq3.0:
+	Nome p/ instância: formato-separado-por-hifen
+	Selecione o Grupo ou crie um novo 
+	Nome do Microsserviço: formato-separado-por-hifen
+	Tipo de Projeto: Java
+
+01-b) Criando repositorios p/ Plataforma: 
+https://aic.intranet.bb.com.br
+- Plataforma BB:
+	Selecione a sigla:
+	Nome do projeto: sigla-formato-separado-por-hifen
+	 Aplicativo
+	 
+02) Clonando o Repositório no Gitlab:
+https://gitlab.desenv.bb.com.br
+- Clonar > Https > CopyURL
+- Abra um terminal > Acesse a pasta do repositorio e digite:
+	git clone urlCopiada
+
+Obs) Em caso de Erro de Certificado:
+- Baixe o certificado:
+	No firefox, na página do gitlab do seu repositorio > Clique no cadeado ao lado da url > Mais informações > Segurança > Ver certificado > Outros > Baixar > PEM(cadeia) > Salvar arquivo
+- Crie uma pasta de certificados na sua pasta pessoal (~/certs)
+- Copie o arquivo dos certificados para a nova pasta (~/certs/gitlab-desenv-bb-com-br-chain.pem)
+- Faça o git enxergar esse arquivo. Acesse a pasta do repositorio e digite:
+	git config --global http.sslCAInfo /home/seuUsuario/certs/gitlab-desenv-bb-com-br-chain.pem
+- Faça o clone.
+
+03) Iniciando um projeto/adicionando arquivos/fazendo commit:
+a) Novo projeto gerando um arquivo package.json via npm (Node):
+- Abra um terminal > Acesse a pasta do repositorio e digite:
+	al nodew npm init
+		...
+		description: Coloque uma descrição
+		license: BSD-2-Clause
+		...
+- Verifique status do projeto no git:
+	git status
+- Adicione o novo arquivo ao git:
+	git add package.json
+- Commit a alteração:
+	git commit -m "Mensagem para o commit."
+- Verifique status do projeto no git
+
+
+04) Enviando commit para o repositorio remoto:
+- Verifique status do projeto no git:
+	git status
+- Deverá aparecer uma mensagem parecida com "Your branch is ahead of 'origin/master' by 1 commit"
+- Atualize o repositório:
+	git push
+		Username for 'https://gitlab.desenv.bb.com.br': fxxxxxxx
+		Password for 'https://fxxxxxxx@gitlab.desenv.bb.com.br': informeSenhaBB
+		
+05) Criando branch (develop):
+- Abra um terminal > Acesse a pasta do repositorio e digite:
+	git branch develop
+- Acesse a nova branch:
+	git checkout develop
+- Verifique sua branch atual:
+	git status (ou)
+	git branch
+	
+06) Trabalhando no projeto:
+- Edite o arquivo (edição via terminal) package.son:
+	vi package.json
+- Encerre a edicao (comando wq)
+- Adicione as alterações do novo arquivo ao git:
+	git add package.json
+- Commit da alteração (-a : commit all changed files):
+	git commit -am "Atualização de..."	
+- Atualize o repositório:
+	git push
+
+Obs) Caso apresente erro "fatal: The current branch develop has no upstream branch..."
+- Digite o comando indicado no erro:
+	git push --set-upstream origin develop
+- Atualize o repositorio
+
+07) Simulando Conflitos entre versões de desenvolvedores distintos:
+- Saia da pasta do seu projeto
+- Clone dentro de uma outra pasta:
+	git clone urlCopiada nomeDaOutraPasta
+- Acesse a branch develop
+	git checkout develop
+- Faça as altualizações num dos arquivos
+- Adicione as alterações ao git:
+	git add package.json
+- Commit da alteração (-a : commit all changed files):
+	git commit -am "Atualização de..."	
+- Atualize o repositório:
+	git push
+- Retorne para a outra pasta (do outro desenvolvedor)
+- Acesse a mesma branch develop
+- Faça as altualizações no mesmo ponto alterado na outra pasta
+- Adicione as alterações ao git e faça o commit
+- Atualize o repositório 
+	AGORA OCORRERA O CONFLITO DE VERSOES!!! 
+	"hint: Update were rejected because the remote contains work that you do not have locally..."
+- Traga as alterações para o repositorio local:
+	git pull (havera um alerta indicando conflito no arquivo alterado)
+- Confirme o conflito verificando o status:
+	git status
+- Acesse o arquivo com o conflito. Nele, o git deverá ter marcado o local do conflito.
+	Ex: vi package.json ou via Vscode
+- Para descobrir quem fez a alteração anterior, copie o codigo hash que está na marcação do git no arquivo 
+	No terminal, execute:
+		git log | grep coleOs8BytesIniciaisDoHashCopiado
+	Ou veja o histórico no proprio repositorio remoto:
+		Selecione a branch (developer) > Repositório > Commits
+	Ou no Vscode, na extesão do Git, ele mostrará o ponto das alterações no arquivo, com opções de Accept Current/Incoming/Both/Compare
+	Obs) Ainda no VSCode, você pode usar algumas extensões auxiliares:
+		GitLens
+		Git History
+- Trate o conflito (retirando as marcações do git) e salve o arquivo
+- Adicione as alterações ao git:
+	git add package.json
+- Commit da alteração:
+	git commit -am "Atualização de..."	
+- Atualize o repositório:
+	git push	
+
+08) Gitignore:
+- Crie um arquivo numa pasta nova:
+	mkdir .settings
+- Crie um novo arquivo na pasta nova:
+	touch .settings/settings.xml
+- Crie o arquivo .gitignore na raiz do seu proejeto
+	touch .gitignore (ou use o VScode)
+- Edite o arquivo, incluindo as extensões que deseja ignorar. Ex:
+	*.xml - todos os arquivos extensão xml
+	/target - pasta target
+	*.jar - arquivos jar (dependencias do projeto)
+	*.class - codigo binario do java
+
+	
+09) Configurações Globais:
+- Mostrando configurações globais do git:
+	git config --global -l
+- Retira usuario configuracao global:
+	git config --global --unset user.name
+	git config --global --unset user.email
+- Crie um arquivo no diretorio do seu projeto:
+	touch index.js
+- Adicione e faça o commit desse novo arquivo
+	AQUI O COMMIT DEVE RECLAMAR AUSENCIA DO USUARIO ("Please tell me who you are")
+- Configure o usuario local no seu projeto
+	git config user.name "Nome"
+	git config user.email "Nome"
+	Obs) Todo commit feito no banco tem validacao de usuario. Portanto, o padrao deve ser:
+		git config user.name "Fxxxxxxx Nome Completo"
+		git commit --amend --author="Fxxxxxxx Nome Completo <emailDoBanco@bb.com.br>"
+- Mostrando configurações locais do git:
+	git config -l
+- Para mostrar as configurações e suas origens:
+	git config -l --show-origin
