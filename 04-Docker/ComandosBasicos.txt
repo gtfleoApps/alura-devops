@@ -4,13 +4,6 @@ https://www.youtube.com/watch?v=wpdcGgRY5kk
 Git: https://github.com/codeedu/wsl2-docker-quickstart#docker-desktop-com-wsl2
 
 
-+ Criando container com mysql:
-------------------------------
-Com o arquivo mysql+adminer.yml copiado e docker instalado:
-docker-compose -f mysql+adminer.yml up
-
-
-
 +COMANDOS BASICOS:
 ------------------
 
@@ -114,6 +107,9 @@ Iniciar o servidor sem travar o terminal (Esse seria o comando final p/ geraçã
 Caso queira iniciar dentro do diretório onde está o projeto, o comando pode ficar assim (usando pwd):
 > docker run -d -p 8080:3000 -v "$(pwd):/var/www" -w "/var/www" node npm start
 
+Para executar o bash dentro de um container em execução:
+> docker exec -it id-container bash
+
 
 + CONSTRUINDO IMAGENS:
 ----------------------
@@ -179,3 +175,138 @@ Faça um push da sua imagem:
 
 Faça um teste e recupere a imagem do docker hub:
 > docker pull leoguerra/node-alura
+
+
++ CRIANDO REDES NO DOCKER (para que os containers possam se comunicar usando o nome do container):
+--------------------------------------------------------------------------------------------------
+
+Criando uma rede nova (de nome minha-rede) no docker (com bridge driver):
+> docker network create --driver bridge minha-rede
+
+Para listar as redes do docker:
+> docker network ls
+
+Criando dois containers dentro de minha-rede:
+> docker run -it --name meu-container-ubuntu-1 --network minha-rede ubuntu
+> docker run -it --name meu-container-ubuntu-2 --network minha-rede ubuntu
+
+Pode inspecionar os containers para verificar a rede:
+> docker inspect id-container
+
+Criando containers mongodb e de uma aplicação de testes, dentro da mesma rede:
+> docker run -d --name meu-mongo --network minha-rede mongo
+> docker run --network minha-rede -d -p 8080:3000 douglasq/alura-books:cap05
+
+Para inspecionar a rede e os containers que estão nela:
+> docker network inspect minha-rede
+
+Para consultar os documentos no container meu-mongo:
+> docker exec -it meu-mongo bash
+> mongo
+> show dbs
+ou
+> docker exec -it meu-mongo mongo
+> show dbs
+
+Para fazer um ping entre containers:
+> docker exec -it nome-container1 ping nome-container2
+
+
++ DOCKER COMPOSE - SUBINDO MÚLTIPLOS CONTAINERS:
+------------------------------------------------
+
+Crie um arquivo yaml na raiz do projeto (parece um json, mas tabulado):
+> docker-compose.yml
+
+No arquivo docker-compose.yml:
+>
+version: '3' 							// Versão do docker-compose
+services: 							// Serviços (containers) da aplicação
+	nginx:							// Nome do serviço
+		build:						// Parametros para build de um dos serviços
+			dockerfile: ./docker/nginx.dockerfile 	// Onde está o dockerfile a ser utilizado
+			context: . 				// Pasta atual onde se encontra o yml
+		image: douglasq/nginx				// Nome da imagem 
+		container_name: nginx				// Nome que será dado ao container no docker
+		ports:						// Mapeamento de Portas utilizadas
+			- "80:80"				// porta-host:porta-container
+		networks:					// Rede do container
+			- production-network			// Nome da rede
+		depends_on:					// Cria uma ordem para os builds
+			- "node1"				// Obs: "-" indica propriedade com array de itens
+			- "node2"
+			- "node3"
+
+	mongodb:						// Esse serviço foi criado sem build de dockerfile
+		image: mongo					// Imagem padrao do mongo no docker hub
+		networks:					// Rede do container
+			- production-network
+
+	node1:
+		build:
+			dockerfile: ./docker/alura-books.dockerfile
+			context: .
+		image: douglasq/alura-books
+		container_name: alura-books1
+		ports:
+			- "3000"				// Exposição de porta 3000
+		networks:
+			- production-network
+		depends_on:					// Cria uma ordem para os builds
+			- "mongodb"
+
+	node2:
+		build:
+			dockerfile: ./docker/alura-books.dockerfile
+			context: .
+		image: douglasq/alura-books
+		container_name: alura-books2
+		ports:
+			- "3000"
+		networks:
+			- production-network
+		depends_on:
+			- "mongodb"
+
+	node3:
+		build:
+			dockerfile: ./docker/alura-books.dockerfile
+			context: .
+		image: douglasq/alura-books
+		container_name: alura-books3
+		ports:
+			- "3000"
+		networks:
+			- production-network
+		depends_on:
+			- "mongodb"
+
+networks:							// Cria a Rede a ser usada pelos serviços/containers
+	production-network:					// Nome que foi dados à rede
+		driver: bridge					// Driver usado para criação da rede
+<
+
+
+Instalando o Docker Compose na versão mais atual:
+> sudo curl -L https://github.com/docker/compose/releases/download/1.15.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+
+Dando permissão de execução ao docker-compose:
+> sudo chmod +x /usr/local/bin/docker-compose
+
+Fazendo o build das imagens (douglasq/nginx e douglasq/alura-books), executando o comando na pasta do projeto:
+> docker-compose build
+
+Criando os serviços a partir do arquivo yml:
+> docker-compose up
+
+Criando os serviços a partir do arquivo yml, liberando o terminal:
+> docker-compose up -d
+
+Visualizando os serviços contidos no arquivo yml:
+> docker-compose ps
+
+Parando e removendo os containers contidos no arquivo yml:
+> docker-compose down
+
+Visualizando o help:
+docker-compose --help
