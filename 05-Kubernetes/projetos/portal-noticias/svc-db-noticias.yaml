@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-db-noticias
+spec:
+  type: ClusterIP  
+  ports:
+    - port: 3306        #targetPort: 80 # nao precisa pois o port eh igual ao targetPort
+  selector:
+    app: db-noticias

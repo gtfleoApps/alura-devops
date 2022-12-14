@@ -1,0 +1,9 @@
+docker exec -i <container_name> mysql -u root -ppassword < /path/to/script.sql
+docker exec -i 2e1 mysql -u root -proot < ./db/init.sql
+
+# Copiando arquivo para dentro do container:
+docker cp ./dummy.sql <container_id>:/
+
+# Problema pode ter sido causado pelo bd jah existente. Então, rodar:
+docker volume rm nutrido-api-quarkus_mysql.nutrido-alimento
+https://stackoverflow.com/questions/38504257/mysql-scripts-in-docker-entrypoint-initdb-are-not-executed

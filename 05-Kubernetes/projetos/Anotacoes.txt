@@ -1,0 +1,76 @@
+/* Minikube */
+
+Documentação kubernetes (cheatsheets):
+https://kubernetes.io/pt-br/docs/reference/kubectl/cheatsheet/
+
+Documentação minikube (cluster local kubernetes):
+https://minikube.sigs.k8s.io/docs/start/
+
+Utilizando Minikube para acessar Apps:
+https://minikube.sigs.k8s.io/docs/handbook/accessing/
+
+WSL2: Cannot access kubernetes services #9765
+https://github.com/kubernetes/minikube/issues/9765
+
+Inicialize o Docker:
+> sudo service docker start
+
+Inicializando o cluster:
+> minikube start
+
+Com erro de inicialização? Tente:
+> minikube delete
+> minikube start --driver=docker
+
+Caso nao consiga o acesso usando o INTERNAL-IP ou localhost (por conta do WSL2), execute o comando:
+> minikube service nomeDoService
+
+Para subir todos os services:
+> minikube service --all
+
+/* k8s */
+
+Comandos que criam, descrevem e editam pods, respectivamente:
+> kubectl run pod nomeDoPod
+> kubectl describe pod nomeDoPod
+> kubectl edit pod nomeDoPod
+> kubectl delete pod nomeDoPod
+> kubectl delete pods --all
+
+Visualizando os pods:
+> kubectl get pods
+> kubectl get pods --watch
+> kubectl get pods -o wide
+
+Executando arquivo com a definição para criação de pod, na pasta do projeto:
+> kubectl apply -f ./primeiro-pod.yaml
+
+Excluindo pod do arquivo
+> kubectl delete -f ./primeiro-pod.yaml
+
+Abrindo um terminal dentro do Pod:
+> kubectl exec -it portal-noticias -- bash
+
+Executando Mysql de um Pod:
+> kubectl exec -it db-noticias -- mysql -u root -p
+
+Executando arquivo para criação de service (SVC):
+> kubectl apply -f ./svc-pod-2.yaml
+
+Visualizando os services:
+> kubectl get svc 
+
+Excluindo os services:
+> kubectl delete svc --all
+
+Visualizando o IP do node (minikube), para acesso externo ao Cluster-IP:
+> kubectl get nodes -o wide
+
+Visualizando ConfigMap:
+> kubectl get configmap
+
+Descrevendo ConfigMap:
+> kubectl describe configmap nomeDoConfigMap
+
+Para saber mais: NodePort e IP's:
+https://kubernetes.io/docs/concepts/services-networking/service/#nodeport
