@@ -74,3 +74,66 @@ Descrevendo ConfigMap:
 
 Para saber mais: NodePort e IP's:
 https://kubernetes.io/docs/concepts/services-networking/service/#nodeport
+
+
+/* K8S - ReplicaSet */
+
+Criando o ReplicaSet:
+> kubectl apply -f ./portal-noticias-replicaset.yaml
+
+Visualizando replicasets (rs):
+> kubectl get replicasets
+
+Visualizando o que acontece com os pods do replicaset:
+> kubectl get rs --watch
+
+
+/* K8S - Deployment (ReplicaSet com uma camada que permite versionamento de imagens e pods) */
+
+Criando o Deployment:
+> kubectl apply -f ./nginx-deployment.yaml
+
+Visualizando deployments:
+> kubectl get deployments
+
+Visualizando historico de mudanças:
+> kubectl rollout history deployment nginx-deployment
+
+Após alteração da versão do container, executando o comando abaixo, tem-se pods atualizados, com as novas versões:
+> kubectl apply -f ./nginx-deployment.yaml --record
+
+Gravando mensagem para o historico de mudanças:
+> kubectl annotate deployment nginx-deployment kubernetes.io/change-cause="Definindo a imagem com versão latest"
+
+Fazendo rollback de versões:
+> kubectl rollout undo deployment <nome do deployment> --to-revision=<versao do comando history a ser retornada>
+
+Deletando deployment e seus pods criados:
+> kubectl delete deployment nginx-deployment
+> kubectl delete -f ./nginx-deployment.yaml
+
+
+/* K8S - Volumes: ciclos de vida independentes dos containers, mas dependentes dos pods;
+         Porém, mesmo com o fim do pod e do volume, os arquivos permanecem em disco. */
+
+Executando bash em um container especifico de um pod:
+> kubectl exec -it pod-volume --container nginx-container -- bash
+
+Usando o Minikube, no Linux, o mapeamento de volume necessita da criacao do diretorio na maquina virtual:
+> minikube ssh
+> sudo mkdir primeiro-volume
+> cd primeiro-volume
+> pwd (copie esse path)
+> exit
+
+ou, caso não queira criar o diretorio na mão, deve-se incluir o OrCreate ao type (no .yaml):
+  volumes:
+    - name: primeiro-volume
+      hostPath: 
+        path: /home/docker/primeiro-volume
+        type: DirectoryOrCreate
+
+
+/* K8S - Persistent Volumes */
+https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+
