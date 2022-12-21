@@ -137,3 +137,41 @@ ou, caso não queira criar o diretorio na mão, deve-se incluir o OrCreate ao ty
 /* K8S - Persistent Volumes */
 https://kubernetes.io/docs/concepts/storage/persistent-volumes/
 
+
+/* K8S - Storage Classes */
+Permitem criar volumes, disco e persistence volumes, dinamicamente.
+
+> kubectl apply -f ./sc.yaml
+> kubectl get sc
+> kubectl apply -f ./pvc-sc.yaml
+> kubectl apply -f ./pod-sc.yaml
+
+
+/* K8S - Stateful Set */
+Conteudo do Pod não é perdido ao ser iniciado. Diferentemente
+do Deployment, onde o conteúdo é perdido.
+
+> kubectl get deployments
+> kubectl delete deployments sistema-noticias-deployment
+
+> kubectl apply -f ./imagens-pvc.yaml
+> kubectl apply -f ./sessao-pvc.yaml
+> kubectl apply -f ./sistema-noticias-statefulset.yaml
+
+
+/* K8S - Probes */
+https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+
+Apesar do Pod estar saudável, nossa aplicação dentro do
+container pode não responder como esperado. 
+ 
+ - Liveness Probe: Prova de vida de que a aplicação dentro
+ de um container de um Pod está funcionando.
+ Ele indicará falha caso o código de retorno seja 
+ menor que 200 ou maior/igual a 400.
+
+ - Readiness Probe: O container dentro do Pod pode
+ ainda não estar 100% para receber requisições.
+
+ - Startup Probe: Voltado para aplicações legadas, 
+ porque tendem a exigir tempo adicional para inicializar na primeira vez. Nem sempre Liveness ou Readiness Probes vão conseguir resolver de maneira simples os problemas de inicialização de aplicações legadas.
