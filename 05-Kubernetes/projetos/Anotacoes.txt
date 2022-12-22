@@ -28,6 +28,9 @@ Caso nao consiga o acesso usando o INTERNAL-IP ou localhost (por conta do WSL2),
 Para subir todos os services:
 > minikube service --all
 
+
+
+
 /* k8s */
 
 Comandos que criam, descrevem e editam pods, respectivamente:
@@ -76,6 +79,8 @@ Para saber mais: NodePort e IP's:
 https://kubernetes.io/docs/concepts/services-networking/service/#nodeport
 
 
+
+
 /* K8S - ReplicaSet */
 
 Criando o ReplicaSet:
@@ -86,6 +91,8 @@ Visualizando replicasets (rs):
 
 Visualizando o que acontece com os pods do replicaset:
 > kubectl get rs --watch
+
+
 
 
 /* K8S - Deployment (ReplicaSet com uma camada que permite versionamento de imagens e pods) */
@@ -113,6 +120,8 @@ Deletando deployment e seus pods criados:
 > kubectl delete -f ./nginx-deployment.yaml
 
 
+
+
 /* K8S - Volumes: ciclos de vida independentes dos containers, mas dependentes dos pods;
          Porém, mesmo com o fim do pod e do volume, os arquivos permanecem em disco. */
 
@@ -134,8 +143,12 @@ ou, caso não queira criar o diretorio na mão, deve-se incluir o OrCreate ao ty
         type: DirectoryOrCreate
 
 
+
+
 /* K8S - Persistent Volumes */
 https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+
+
 
 
 /* K8S - Storage Classes */
@@ -145,6 +158,8 @@ Permitem criar volumes, disco e persistence volumes, dinamicamente.
 > kubectl get sc
 > kubectl apply -f ./pvc-sc.yaml
 > kubectl apply -f ./pod-sc.yaml
+
+
 
 
 /* K8S - Stateful Set */
@@ -157,6 +172,8 @@ do Deployment, onde o conteúdo é perdido.
 > kubectl apply -f ./imagens-pvc.yaml
 > kubectl apply -f ./sessao-pvc.yaml
 > kubectl apply -f ./sistema-noticias-statefulset.yaml
+
+
 
 
 /* K8S - Probes */
@@ -174,4 +191,70 @@ container pode não responder como esperado.
  ainda não estar 100% para receber requisições.
 
  - Startup Probe: Voltado para aplicações legadas, 
- porque tendem a exigir tempo adicional para inicializar na primeira vez. Nem sempre Liveness ou Readiness Probes vão conseguir resolver de maneira simples os problemas de inicialização de aplicações legadas.
+ porque tendem a exigir tempo adicional para inicializar na primeira vez. 
+ Nem sempre Liveness ou Readiness Probes vão conseguir resolver de maneira 
+ simples os problemas  de inicialização de aplicações legadas.
+
+
+
+
+ /* K8S - Horizontal Pod Autoscaler */
+
+> kubectl apply -f ./portal-noticias-deployment.yaml
+> kubectl apply -f ./portal-noticias-hpa.yaml
+> kubectl get hpa
+> kubectl describe hpa portal-noticias-hpa
+> kubectl get hpa --watch
+
+- No Windows:
+Caso encontre-se erro para leitura do consumo de CPU, ajustar components.yaml e executar:
+> kubectl apply -f ./components.yaml
+
+Para simular a escalabilidade, use o script stress-windows.ssh (a cada 0.001 seg, gravando no arquivo out.txt):
+> bash stress-windows.ssh 0.001 > out.txt
+
+- No Linux:
+Caso encontre-se erro para leitura do consumo de CPU:
+> minikube addons list
+> minikube addons enable metrics-server
+
+Altere o arquivo stress.sh, incluindo o IP do Nó (node):
+> kubectl get nodes -o wide 
+(copie o INTERNAL-IP e substitua, no arquivo stress.sh, o localhost por esse IP)
+
+Para simular a escalabilidade, use o script stress-linux.ssh (a cada 0.001 seg, gravando no arquivo out.txt):
+> bash stress-linux.ssh 0.001 > out.txt
+
+
+
+
+/* K8S - Jobs */
+Executa uma ação e, logo após conclusão, não reinicia o pod.
+
+https://kubernetes.io/docs/concepts/workloads/controllers/job/
+
+> kubectl apply -f ./job.yaml
+> kubectl get pods --watch
+> kubectl get jobs
+> kubectl describe job pi-job
+
+
+
+
+/* K8S - HELM */
+Gerenciador de pacotes para cluster K8S. 
+
+https://helm.sh/docs/
+
+
+Uma aplicação pode ter os seguintes arquivos yaml, por exemplo:
+App + Serviço + Ingress + ConfigMap + Secret (ConfigMap encriptado)
+
+Ao atualizar algum desses arquivos, seria necessário, manualmente, executar o kubectl apply -f <arquivo.yaml>.
+
+Com o HELM é possível fazer gerenciamento de pacotes para entregar aplicações no Kubernetes. 
+Ele vai empacotar em CHARTS todas as as dependências da aplicação, como os volumes, ingress, configmaps, 
+servicos e tudo que torna a aplicação completa.
+
+Os 3 grandes conceitos:
+CHART > RELEASE (versão) > REPOSITORIO (pode ou não ocorrer).

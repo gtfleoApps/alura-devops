@@ -1,0 +1,15 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pi-job
+  labels:
+    app: primeiro-pod
+spec:
+  template:
+    spec:
+      containers:
+        - name: container-pi
+          image: perl
+          command: ["perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)"] # comando usado para calcular pi
+      restartPolicy: Never # para nao ficar reiniciando pod, apos execucao do job
+  backoffLimit: 3 # nr de tentativas de execucao do job, antes de falhar

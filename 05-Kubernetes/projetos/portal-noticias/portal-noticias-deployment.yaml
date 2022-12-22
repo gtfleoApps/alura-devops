@@ -32,6 +32,10 @@ spec:
             periodSeconds: 10
             failureThreshold: 5 # nr tentativas antes de ignorar o readiness
             initialDelaySeconds: 3 # iniciar validacao apos inicio do container
+          resources: # definindo recurso, que depois serah usado para config no Horizontal Pod Autoscaler
+            requests:
+              cpu: 10m
+
   replicas: 3
   selector:
     matchLabels:
